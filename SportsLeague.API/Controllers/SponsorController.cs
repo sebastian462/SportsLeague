@@ -9,47 +9,47 @@ namespace SportsLeague.API.Controllers;
 
 [ApiController]   //DayaAnnottations para validar el modelo, si el modelo no es valido, se devuelve un 400 Bad Request automáticamente con los errores de validación.
 [Route("api/[controller]")]
-public class TeamController : ControllerBase
+public class SponsorController : ControllerBase
 {
-    private readonly ITeamService _teamService;
+    private readonly ISponsorService _sponsorService;
     private readonly IMapper _mapper;
 
-    public TeamController(
-        ITeamService teamService,
+    public SponsorController(
+        ISponsorService sponsorService,
         IMapper mapper)
     {
-        _teamService = teamService;
+        _sponsorService = sponsorService;
         _mapper = mapper;
     }
 
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<TeamResponseDTO>>> GetAll()
+    public async Task<ActionResult<IEnumerable<SponsorResponseDTO>>> GetAll()
     {
-        var teams = await _teamService.GetAllAsync();
-        var teamsDto = _mapper.Map<IEnumerable<TeamResponseDTO>>(teams);
-        return Ok(teamsDto);
+        var sponsors = await _sponsorService.GetAllAsync();
+        var sponsorsDto = _mapper.Map<IEnumerable<SponsorResponseDTO>>(sponsors);
+        return Ok(sponsorsDto);
     }
 
     [HttpGet("{id}")]
-    public async Task<ActionResult<TeamResponseDTO>> GetById(int id)
+    public async Task<ActionResult<SponsorResponseDTO>> GetById(int id)
     {
-        var team = await _teamService.GetByIdAsync(id);
+        var sponsor = await _sponsorService.GetByIdAsync(id);
 
-        if (team == null)
-            return NotFound(new { message = $"Equipo con ID {id} no encontrado" });
+        if (sponsor == null)
+            return NotFound(new { message = $"Sponsor con ID {id} no encontrado" });
 
-        var teamDto = _mapper.Map<TeamResponseDTO>(team);
-        return Ok(teamDto);
+        var sponsorDto = _mapper.Map<SponsorResponseDTO>(sponsor);
+        return Ok(sponsorDto);
     }
 
     [HttpPost]
-    public async Task<ActionResult<TeamResponseDTO>> Create(TeamRequestDTO dto)
+    public async Task<ActionResult<SponsorResponseDTO>> Create(SponsorRequestDTO dto)
     {
         try
         {
-            var team = _mapper.Map<Team>(dto);
-            var createdTeam = await _teamService.CreateAsync(team);
-            var responseDto = _mapper.Map<TeamResponseDTO>(createdTeam);
+            var sponsor = _mapper.Map<Sponsor>(dto);
+            var createdSponsor = await _sponsorService.CreateAsync(sponsor);
+            var responseDto = _mapper.Map<SponsorResponseDTO>(createdSponsor);
 
             return CreatedAtAction(
                 nameof(GetById),
@@ -63,12 +63,12 @@ public class TeamController : ControllerBase
     }
 
     [HttpPut("{id}")]
-    public async Task<ActionResult> Update(int id, TeamRequestDTO dto)
+    public async Task<ActionResult> Update(int id, SponsorRequestDTO dto)
     {
         try
         {
-            var team = _mapper.Map<Team>(dto);
-            await _teamService.UpdateAsync(id, team);
+            var sponsor = _mapper.Map<Sponsor>(dto);
+            await _sponsorService.UpdateAsync(id, sponsor);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
@@ -86,7 +86,7 @@ public class TeamController : ControllerBase
     {
         try
         {
-            await _teamService.DeleteAsync(id);
+            await _sponsorService.DeleteAsync(id);
             return NoContent();
         }
         catch (KeyNotFoundException ex)
