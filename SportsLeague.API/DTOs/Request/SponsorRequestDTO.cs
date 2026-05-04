@@ -9,5 +9,9 @@ namespace SportsLeague.API.DTOs.Request
         public string? Phone { get; set; }
         public string? WebSiteUrl { get; set; }
         public SponsorCategory Category { get; set; }
+
+        public DateTime CreatedAt { get; set; }
+
+        public DateTime? UpdatedAt { get; set; }
     }
 }

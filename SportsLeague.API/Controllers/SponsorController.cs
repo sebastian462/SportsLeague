@@ -94,5 +94,75 @@ public class SponsorController : ControllerBase
             return NotFound(new { message = ex.Message });
         }
     }
+
+    [HttpGet("{id}/tournaments")]
+    public async Task<ActionResult<IEnumerable<TournamentResponseDTO>>> GetTournamentsBySponsor(int id)
+    {
+        var tournaments = await _sponsorService.GetTournamentsBySponsorAsync(id);
+
+        if (tournaments == null)
+            return NotFound();
+
+        var result = _mapper.Map<IEnumerable<TournamentResponseDTO>>(tournaments);
+
+        return Ok(result);
+    }
+
+
+    // POST api/sponsor/1/tournaments
+    [HttpPost("{id}/tournaments")]
+    public async Task<IActionResult> AddTournament(int id, [FromBody] TournamentSponsorRequestDTO dto)
+    {
+        try
+        {
+            var result = await _sponsorService.AddTournamentAsync(
+                id,
+                dto.TournamentId,
+                dto.ContractAmount
+            );
+
+            return Created("", new
+            {
+                id = result.Id,
+                tournamentId = result.TournamentId,
+                tournamentName = result.Tournament.Name,
+                sponsorId = result.SponsorId,
+                sponsorName = result.Sponsor.Name,
+                contractAmount = result.ContractAmount,
+                joinedAt = result.JoinedAt
+            });
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return Conflict(new { message = ex.Message });
+        }
+    }
+
+    // DELETE api/sponsor/1/tournaments/5
+    [HttpDelete("{id}/tournaments/{tournamentId}")]
+    public async Task<ActionResult> RemoveTournament(
+        int id,
+        int tournamentId)
+    {
+        try
+        {
+            await _sponsorService.RemoveTournamentAsync(id, tournamentId);
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+    }
 }
+
+
+
+
+
+
 

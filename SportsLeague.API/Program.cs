@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SportsLeague.DataAccess.Context;
 using SportsLeague.DataAccess.Repositories;
+using SportsLeague.DataAccess.Seeders;
 using SportsLeague.Domain.Interfaces.Repositories;
 using SportsLeague.Domain.Interfaces.Services;
 using SportsLeague.Domain.Services;
@@ -21,6 +22,7 @@ builder.Services.AddScoped<ITournamentRepository, TournamentRepository>();     /
 builder.Services.AddScoped<ITournamentTeamRepository, TournamentTeamRepository>(); // NUEVO
 builder.Services.AddScoped<ISponsorRepository, SponsorRepository>(); // NUEVO
 builder.Services.AddScoped<ITournamentSponsorRepository, TournamentSponsorRepository>(); // NUEVO
+builder.Services.AddScoped<IMatchRepository, MatchRepository>(); // NUEVO
 
 
 // ── Services ──
@@ -29,6 +31,7 @@ builder.Services.AddScoped<IPlayerService, PlayerService>();
 builder.Services.AddScoped<IRefereeService, RefereeService>();           // NUEVO
 builder.Services.AddScoped<ITournamentService, TournamentService>();     // NUEVO
 builder.Services.AddScoped<ISponsorService, SponsorService>(); // NUEVO
+builder.Services.AddScoped<IMatchService, MatchService>(); // NUEVO
 
 
 // ── AutoMapper ──
@@ -42,6 +45,17 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+//-- Data Seeder --
+using (var scope = app.Services.CreateScope())
+{ 
+   var context = scope.ServiceProvider.GetRequiredService<LeagueDbContext>();
+
+    await context.Database.MigrateAsync(); // Crea la la base de datos si no existe y aplica migraciones pendientes.
+    await DataSeeder.SeedAsync(context); // Si la base de datos está vacía, la pobla con datos iniciales.
+
+}
+
 
 // ── Middleware Pipeline ──
 if (app.Environment.IsDevelopment())

@@ -106,11 +106,10 @@ public class SponsorService : ISponsorService
 
     }
 
-    public async Task LinkSponsorToTournament(int sponsorId,int tournamentId,decimal contractAmount)
+    public async Task<TournamentSponsor> LinkSponsorToTournament(int sponsorId, int tournamentId, decimal contractAmount)
     {
         if (contractAmount <= 0)
-            throw new InvalidOperationException(
-                "ContractAmount must be greater than 0");
+            throw new InvalidOperationException("ContractAmount must be greater than 0");
 
         var sponsor = await _sponsorRepository.GetByIdAsync(sponsorId);
         if (sponsor == null)
@@ -124,8 +123,7 @@ public class SponsorService : ISponsorService
             .ExistsAsync(tournamentId, sponsorId);
 
         if (exists)
-            throw new InvalidOperationException(
-                "Sponsor already linked to tournament");
+            throw new InvalidOperationException("Sponsor already linked to tournament");
 
         var relation = new TournamentSponsor
         {
@@ -135,7 +133,13 @@ public class SponsorService : ISponsorService
             JoinedAt = DateTime.UtcNow
         };
 
-        await _tournamentSponsorRepository.CreateAsync(relation);
+        var created = await _tournamentSponsorRepository.CreateAsync(relation);
+
+        //carga datos para el response
+        created.Sponsor = sponsor;
+        created.Tournament = tournament;
+
+        return created;
     }
 
     public async Task UnlinkSponsorFromTournament(int sponsorId, int tournamentId)
@@ -159,6 +163,23 @@ public class SponsorService : ISponsorService
 
         return await _tournamentSponsorRepository
             .GetBySponsorIdAsync(sponsorId);
+    }
+
+    public async Task<TournamentSponsor> AddTournamentAsync(int sponsorId, int tournamentId, decimal contractAmount)
+    {
+        return await LinkSponsorToTournament(sponsorId, tournamentId, contractAmount);
+    }
+
+    public async Task RemoveTournamentAsync(int sponsorId, int tournamentId)
+    {
+        await UnlinkSponsorFromTournament(sponsorId, tournamentId);
+    }
+
+    public async Task<IEnumerable<Tournament>> GetTournamentsBySponsorAsync(int sponsorId)
+    {
+        var relations = await GetTournamentsBySponsor(sponsorId);
+
+        return relations.Select(r => r.Tournament);
     }
 
 

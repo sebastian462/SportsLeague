@@ -11,6 +11,7 @@ namespace SportsLeague.Domain.Enums
         Goalkeeper = 0,
         Defender = 1,
         Midfielder = 2,
-        Fordward = 3,
+        Forward = 3,
     }
 }
+
